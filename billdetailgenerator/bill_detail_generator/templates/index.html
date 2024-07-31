@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container text-center col-8">
+    <form method="post" action="{% url 'results' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="files">Carga tus archivos en formato '.xml':</label>
+        <input name="myfiles" type="file" id="files" multiple accept=".xml" required="true">
+        <input type="submit" value="OK">
+    </form>
+</div>
+{% endblock %}
+

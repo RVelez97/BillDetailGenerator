@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<table class="table table-dark table-striped-columns">
+    <tr>
+      <th>Fecha</th>
+      <th>Total Sin Impuestos</th>
+      <th>Impuestos</th>
+      <th>Total</th>
+      <th>Numero de factura</th>
+      <th>Razon Social</th>
+      <th>RUC</th>
+    </tr>
+    <tbody class="table-group-divider">
+        {% for partial_resume in total_resume %}
+        <tr>
+            {% for element in partial_resume %}
+                <td>{{ element }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
