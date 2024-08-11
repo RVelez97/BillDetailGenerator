@@ -1,3 +1,13 @@
 billdetailgenerator/db.sqlite3
-venv/Lib/site-packages/pip/__pycache__
+# Ignore Python bytecode files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore __pycache__ directories
+__pycache__/
+
+# Ignore build directories
+build/
+dist/
 
