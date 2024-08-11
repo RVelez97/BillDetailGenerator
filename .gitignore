@@ -1,2 +1,12 @@
 billdetailgenerator/db.sqlite3
+# Ignore Python bytecode files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore __pycache__ directories
 __pycache__/
+
+# Ignore build directories
+build/
+dist/
