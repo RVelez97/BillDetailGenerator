@@ -9,4 +9,3 @@ __pycache__/
 
 # Ignore build directories
 build/
-dist/
