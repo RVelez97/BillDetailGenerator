@@ -13,6 +13,8 @@ def index(request):
     detail_of_bills=[]
     return render(request,'index.html')
 
+def extract_data_from_line(line, pattern):
+    return re.sub(pattern, '', line).strip().rstrip('\n')
 
 def results(request):
     if request.method == 'POST':
@@ -30,21 +32,21 @@ def results(request):
             ruc = ''
             for line in archive:
                 if('fechaEmision' in line):
-                    fechaEmision=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    fechaEmision=extract_data_from_line(line,pattern)
                 elif('baseImponible' in line):
-                    baseImponible=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    baseImponible=extract_data_from_line(line,pattern)
                 elif('valor' in line):
-                    valor=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    valor=extract_data_from_line(line,pattern)
                 elif('importeTotal' in line):
-                    importeTotal=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    importeTotal=extract_data_from_line(line,pattern)
                 elif('estab' in line):
-                    numFactura+=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    numFactura+=extract_data_from_line(line,pattern)
                 elif('ptoEmi' in line):
-                    numFactura+='-'+(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    numFactura+='-'+extract_data_from_line(line,pattern)
                 elif('secuencial' in line):
-                    numFactura+='-'+(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    numFactura+='-'+extract_data_from_line(line,pattern)
                 elif('razonSocial>' in line):
-                    razonSocial=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
+                    razonSocial=extract_data_from_line(line,pattern)
                 elif('ruc' in line):
                     ruc=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
             detail_of_bills.insert(-1,[fechaEmision,baseImponible,valor,importeTotal,numFactura,razonSocial,ruc])
