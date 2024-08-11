@@ -11,4 +11,4 @@ __pycache__/
 build/
 
 #Ignore the venv folder
-venv/
+venv
