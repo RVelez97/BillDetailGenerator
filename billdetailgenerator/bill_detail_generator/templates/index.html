@@ -20,12 +20,8 @@
                 <label class="form-check-label" for="id-show-ruc-option">RUC</label>
             </div>
             <div class="form-check form-switch">
-                <input name='show-total-out-of-taxes-option' class="form-check-input" type="checkbox" role="switch" id="id-show-total-out-of-taxes-option">
-                <label class="form-check-label" for="id-show-total-out-of-taxes-option">Total Sin Impuestos</label>
-            </div>
-            <div class="form-check form-switch">
-                <input name='show-total-taxes-option' class="form-check-input" type="checkbox" role="switch" id="id-show-total-taxes-option">
-                <label class="form-check-label" for="id-show-total-taxes-option">Impuestos</label>
+                <input name='show-total-detailed-option' class="form-check-input" type="checkbox" role="switch" id="id-show-total-detailed-option">
+                <label class="form-check-label" for="id-show-total-detailed-option">Total Detallado</label>
             </div>
         </div>
         <div class="card">
@@ -44,14 +40,12 @@
     const showAllOptionsCheck = document.querySelector("input[id='id-show-all-fields-option']")
     const showBillNumberCheck = document.querySelector("input[id='id-show-bill-number-option']")
     const showRucCheck = document.querySelector("input[id='id-show-ruc-option']")
-    const showTotalOutOfTaxesCheck = document.querySelector("input[id='id-show-total-out-of-taxes-option']")
-    const showTotalTaxesCheck = document.querySelector("input[id='id-show-total-taxes-option']")
+    const showTotalDetailedCheck = document.querySelector("input[id='id-show-total-detailed-option']")
     showAllOptionsCheck.addEventListener('change', function (e) {
         if (showAllOptionsCheck.checked) {
             showBillNumberCheck.checked = false;
             showRucCheck.checked = false;
-            showTotalOutOfTaxesCheck.checked = false;
-            showTotalTaxesCheck.checked = false;
+            showTotalDetailedCheck.checked = false;
         }
         checkAllUnselected();
     })
@@ -70,22 +64,15 @@
         checkAllUnselected()
     })
 
-    showTotalOutOfTaxesCheck.addEventListener('change',function(e){
-        if(showTotalOutOfTaxesCheck.checked){
-            showAllOptionsCheck.checked=false;
-        }
-        checkAllUnselected()
-    })
-
-    showTotalTaxesCheck.addEventListener('change',function(e){
-        if(showTotalTaxesCheck.checked){
+    showTotalDetailedCheck.addEventListener('change',function(e){
+        if(showTotalDetailedCheck.checked){
             showAllOptionsCheck.checked=false;
         }
         checkAllUnselected()
     })
 
     function checkAllUnselected(){
-        if(showBillNumberCheck.checked == false && showRucCheck.checked == false && showTotalOutOfTaxesCheck.checked == false && showTotalTaxesCheck.checked == false){
+        if(showBillNumberCheck.checked == false && showRucCheck.checked == false &&  showTotalDetailedCheck == false){
             showAllOptionsCheck.checked=true;
         }
     }
