@@ -3,10 +3,92 @@
 <div class="container text-center col-8">
     <form method="post" action="{% url 'results' %}" enctype="multipart/form-data">
         {% csrf_token %}
-        <label for="files">Carga tus archivos en formato '.xml':</label>
-        <input name="myfiles" type="file" id="files" multiple accept=".xml" required="true">
-        <input type="submit" value="OK">
+        <div class="card">
+            <div class="card-header">
+                Selecciona los campos que deseas mostrar en el reporte
+            </div>
+            <div class="form-check form-switch">
+                <input name='show-all-fields-option' class="form-check-input" type="checkbox" role="switch" id="id-show-all-fields-option" checked>
+                <label class="form-check-label" for="id-show-all-fields-option">Mostrar todos los campos</label>
+            </div>
+            <div class="form-check form-switch">
+                <input name='show-bill-number-option' class="form-check-input" type="checkbox" role="switch" id="id-show-bill-number-option">
+                <label class="form-check-label" for="id-show-bill-number-option">Numero de Factura</label>
+            </div>
+            <div class="form-check form-switch">
+                <input name ='show-ruc-option' class="form-check-input" type="checkbox" role="switch" id="id-show-ruc-option">
+                <label class="form-check-label" for="id-show-ruc-option">RUC</label>
+            </div>
+            <div class="form-check form-switch">
+                <input name='show-total-out-of-taxes-option' class="form-check-input" type="checkbox" role="switch" id="id-show-total-out-of-taxes-option">
+                <label class="form-check-label" for="id-show-total-out-of-taxes-option">Total Sin Impuestos</label>
+            </div>
+            <div class="form-check form-switch">
+                <input name='show-total-taxes-option' class="form-check-input" type="checkbox" role="switch" id="id-show-total-taxes-option">
+                <label class="form-check-label" for="id-show-total-taxes-option">Impuestos</label>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Carga tus archivos en formato '.xml'
+            </div>
+            <div>
+                <input name="myfiles" type="file" id="files" multiple accept=".xml" required="true">
+                <input type="submit" value="OK" class="btn btn-primary">
+            </div>
+        </div>
+
     </form>
 </div>
-{% endblock %}
+<script>
+    const showAllOptionsCheck = document.querySelector("input[id='id-show-all-fields-option']")
+    const showBillNumberCheck = document.querySelector("input[id='id-show-bill-number-option']")
+    const showRucCheck = document.querySelector("input[id='id-show-ruc-option']")
+    const showTotalOutOfTaxesCheck = document.querySelector("input[id='id-show-total-out-of-taxes-option']")
+    const showTotalTaxesCheck = document.querySelector("input[id='id-show-total-taxes-option']")
+    showAllOptionsCheck.addEventListener('change', function (e) {
+        if (showAllOptionsCheck.checked) {
+            showBillNumberCheck.checked = false;
+            showRucCheck.checked = false;
+            showTotalOutOfTaxesCheck.checked = false;
+            showTotalTaxesCheck.checked = false;
+        }
+        checkAllUnselected();
+    })
 
+    showBillNumberCheck.addEventListener('change',function(e){
+        if(showBillNumberCheck.checked){
+            showAllOptionsCheck.checked=false;
+        }
+        checkAllUnselected()
+    })
+
+    showRucCheck.addEventListener('change',function(e){
+        if(showRucCheck.checked){
+            showAllOptionsCheck.checked=false;
+        }
+        checkAllUnselected()
+    })
+
+    showTotalOutOfTaxesCheck.addEventListener('change',function(e){
+        if(showTotalOutOfTaxesCheck.checked){
+            showAllOptionsCheck.checked=false;
+        }
+        checkAllUnselected()
+    })
+
+    showTotalTaxesCheck.addEventListener('change',function(e){
+        if(showTotalTaxesCheck.checked){
+            showAllOptionsCheck.checked=false;
+        }
+        checkAllUnselected()
+    })
+
+    function checkAllUnselected(){
+        if(showBillNumberCheck.checked == false && showRucCheck.checked == false && showTotalOutOfTaxesCheck.checked == false && showTotalTaxesCheck.checked == false){
+            showAllOptionsCheck.checked=true;
+        }
+    }
+
+</script>
+{% endblock %}

@@ -5,7 +5,7 @@ import re
 
 from .forms import XMLUploadForm
 
-header=['Fecha','Total Sin Impuestos','Impuestos','Total','Numero de factura','Razon Social','RUC']
+header=['Fecha','Numero de factura','Razon Social','RUC','Total Sin Impuestos','Impuestos','Total']
 detail_of_bills=[]
 
 def index(request):
@@ -19,37 +19,40 @@ def extract_data_from_line(line, pattern):
 def results(request):
     if request.method == 'POST':
         files = request.FILES.getlist('myfiles')
+        fields={
+            'fechaEmision':True,
+            'baseImponible':True,
+            'valor':False,
+            'importeTotal':True,
+            'estab':False,
+            'ptoEmi':False,
+            'secuencial':False,
+            'razonSocial>':True,
+            'ruc':False
+            }
+        if('show-bill-number-option' in request.POST):
+            fields['estab']=True
+            fields['ptoEmi']=True
+            fields['secuencial']=True
+        if('show-ruc-option' in request.POST):
+            fields['ruc']=True
+        if('show-total-out-of-taxes-option' not in request.POST):
+            fields['baseImponible']=False
+        if('show-total-taxes-option' in request.POST):
+            fields['valor']=True
+        print(fields)
         global detail_of_bills
         pattern = re.compile('<.*?>')
         for i in range(len(files)):
             archive= str(files[i].read(),'ISO-8859-1').split('\r\n')
-            fechaEmision = ''
-            baseImponible = ''
-            valor = ''
-            importeTotal = ''
-            numFactura=''
-            razonSocial=''
-            ruc = ''
+            row=[]
             for line in archive:
-                if('fechaEmision' in line):
-                    fechaEmision=extract_data_from_line(line,pattern)
-                elif('baseImponible' in line):
-                    baseImponible=extract_data_from_line(line,pattern)
-                elif('valor' in line):
-                    valor=extract_data_from_line(line,pattern)
-                elif('importeTotal' in line):
-                    importeTotal=extract_data_from_line(line,pattern)
-                elif('estab' in line):
-                    numFactura+=extract_data_from_line(line,pattern)
-                elif('ptoEmi' in line):
-                    numFactura+='-'+extract_data_from_line(line,pattern)
-                elif('secuencial' in line):
-                    numFactura+='-'+extract_data_from_line(line,pattern)
-                elif('razonSocial>' in line):
-                    razonSocial=extract_data_from_line(line,pattern)
-                elif('ruc' in line):
-                    ruc=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
-            detail_of_bills.insert(-1,[fechaEmision,baseImponible,valor,importeTotal,numFactura,razonSocial,ruc])
+                for key,value in fields.items():
+                    if (key in line and value):
+                        if(key=='ptoEmi' or key=='secuencial'):
+                            row[-1]+='-'+extract_data_from_line(line,pattern)
+                        row.append(extract_data_from_line(line,pattern))
+            detail_of_bills.insert(-1,row)
         
 
         
