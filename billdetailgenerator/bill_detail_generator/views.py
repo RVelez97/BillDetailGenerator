@@ -4,13 +4,13 @@ from django.shortcuts import render
 import re
 
 from .forms import XMLUploadForm
-
-header=['Fecha','Total Sin Impuestos','Impuestos','Total','Numero de factura','Razon Social','RUC']
+header=[]
 detail_of_bills=[]
 
 def index(request):
-    global detail_of_bills
+    global detail_of_bills,header
     detail_of_bills=[]
+    header=[]
     return render(request,'index.html')
 
 def extract_data_from_line(line, pattern):
@@ -18,42 +18,80 @@ def extract_data_from_line(line, pattern):
 
 def results(request):
     if request.method == 'POST':
+        global header
         files = request.FILES.getlist('myfiles')
+        fields={
+            'fechaEmision':True,
+            'estab':False,
+            'ptoEmi':False,
+            'secuencial':False,
+            'razonSocial>':True,
+            'ruc':False,
+            'baseImponible':False,
+            'valor':False,
+            'importeTotal':True,
+            }
+        if('show-all-fields-option' in request.POST):
+            fields['baseImponible']=True
+            fields['valor']=True
+            fields['importeTotal']=True
+            fields['estab']=True
+            fields['ptoEmi']=True
+            fields['secuencial']=True
+            fields['ruc']=True
+        if('show-bill-number-option' in request.POST):
+            fields['estab']=True
+            fields['ptoEmi']=True
+            fields['secuencial']=True
+        if('show-ruc-option' in request.POST):
+            fields['ruc']=True
+        if('show-total-detailed-option' in request.POST):
+            fields['baseImponible']=True
+            fields['valor']=True
+        if fields['razonSocial>']:
+            header.append('Razon Social')
+        if fields['ruc']:
+            header.append('RUC')
+        if fields['estab']:
+            header.append('Numero de factura')
+        if fields['fechaEmision']:
+            header.append('Fecha de Emision')
+        if fields['baseImponible']:
+            header.append('Total Sin Impuestos')
+        if fields['valor']:
+            header.append('Impuestos')
+        if fields['importeTotal']:
+            header.append('Total')
+        
+        
+        print(fields)
         global detail_of_bills
         pattern = re.compile('<.*?>')
         for i in range(len(files)):
             archive= str(files[i].read(),'ISO-8859-1').split('\r\n')
-            fechaEmision = ''
-            baseImponible = ''
-            valor = ''
-            importeTotal = ''
-            numFactura=''
-            razonSocial=''
-            ruc = ''
+            row=[]
+            flag_base_imponible=False
+            flag_valor=False
             for line in archive:
-                if('fechaEmision' in line):
-                    fechaEmision=extract_data_from_line(line,pattern)
-                elif('baseImponible' in line):
-                    baseImponible=extract_data_from_line(line,pattern)
-                elif('valor' in line):
-                    valor=extract_data_from_line(line,pattern)
-                elif('importeTotal' in line):
-                    importeTotal=extract_data_from_line(line,pattern)
-                elif('estab' in line):
-                    numFactura+=extract_data_from_line(line,pattern)
-                elif('ptoEmi' in line):
-                    numFactura+='-'+extract_data_from_line(line,pattern)
-                elif('secuencial' in line):
-                    numFactura+='-'+extract_data_from_line(line,pattern)
-                elif('razonSocial>' in line):
-                    razonSocial=extract_data_from_line(line,pattern)
-                elif('ruc' in line):
-                    ruc=(re.sub(pattern, '', line).lstrip()).removesuffix('\n')
-            detail_of_bills.insert(-1,[fechaEmision,baseImponible,valor,importeTotal,numFactura,razonSocial,ruc])
+                for key,value in fields.items():
+                    if ((key in line) and value):
+                        if(key=='ptoEmi' or key=='secuencial'):
+                            row[-1]+=f'-{extract_data_from_line(line,pattern)}'
+                        elif(key=='baseImponible'):
+                            if(not flag_base_imponible):
+                                row.append(extract_data_from_line(line,pattern))
+                            flag_base_imponible=True
+                        elif(key=='valor'):
+                            if(not flag_valor):
+                                row.append(extract_data_from_line(line,pattern))
+                            flag_valor=True
+                        else:
+                            row.append(extract_data_from_line(line,pattern))
+            detail_of_bills.insert(-1,row)
         
 
         
-        return render(request,'results.html',context={'total_resume':detail_of_bills})
+        return render(request,'results.html',context={'total_resume':detail_of_bills,'header':header})
     
 def download_as_csv(request):
     global header
