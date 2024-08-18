@@ -68,7 +68,7 @@ def results(request):
         global detail_of_bills
         pattern = re.compile('<.*?>')
         for i in range(len(files)):
-            archive= str(files[i].read(),'ISO-8859-1').split('\r\n')
+            archive= str(files[i].read(),'ISO-8859-1').split('\n')
             row=[]
             flag_base_imponible=False
             flag_valor=False
