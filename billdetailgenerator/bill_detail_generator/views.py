@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import re
 
-from .forms import XMLUploadForm
+import xml.etree.ElementTree as et
 header=[]
 detail_of_bills=[]
 
@@ -66,31 +66,26 @@ def results(request):
         
         print(fields)
         global detail_of_bills
-        pattern = re.compile('<.*?>')
         for i in range(len(files)):
-            archive= str(files[i].read(),'ISO-8859-1').split('\n')
+            information = str(files[i].read(),'ISO-8859-1')   
+            ind1=information.index('<infoTributaria>')
+            ind2=information.index('</infoAdicional>')
+            information="<?xml version='1.0' encoding='ISO-8859-1'?>\n"+'<data>\n'+information[ind1:ind2+len('</infoAdicional>')]+'\n</data>\n'
+            root=et.fromstring(information)
             row=[]
-            flag_base_imponible=False
-            flag_valor=False
-            for line in archive:
-                for key,value in fields.items():
-                    if ((key in line) and value):
-                        if(key=='ptoEmi' or key=='secuencial'):
-                            row[-1]+=f'-{extract_data_from_line(line,pattern)}'
-                        elif(key=='baseImponible'):
-                            if(not flag_base_imponible):
-                                row.append(extract_data_from_line(line,pattern))
-                            flag_base_imponible=True
-                        elif(key=='valor'):
-                            if(not flag_valor):
-                                row.append(extract_data_from_line(line,pattern))
-                            flag_valor=True
-                        else:
-                            row.append(extract_data_from_line(line,pattern))
-            detail_of_bills.insert(-1,row)
-        
-
-        
+            for element in root.findall('infoTributaria'):
+                row.append(element.find('razonSocial').text)
+                row.append(element.find('ruc').text)
+                row.append(element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text)
+            for element in root.findall('infoFactura'):
+                row.append(element.find('fechaEmision').text)
+                for x in element.findall('totalConImpuestos'):
+                    for y in x.findall('totalImpuesto'):
+                        row.append(y.find('baseImponible').text)
+                        row.append(y.find('valor').text)
+                row.append(element.find('importeTotal').text)
+            print(row)
+            detail_of_bills.append(row)
         return render(request,'results.html',context={'total_resume':detail_of_bills,'header':header})
     
 def download_as_csv(request):
