@@ -74,17 +74,23 @@ def results(request):
             root=et.fromstring(information)
             row=[]
             for element in root.findall('infoTributaria'):
-                row.append(element.find('razonSocial').text)
-                row.append(element.find('ruc').text)
-                row.append(element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text)
+                if fields['fechaEmision']:
+                    row.append(element.find('razonSocial').text)
+                if fields['ruc']:
+                    row.append(element.find('ruc').text)
+                if fields['estab']:
+                    row.append(element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text)
             for element in root.findall('infoFactura'):
-                row.append(element.find('fechaEmision').text)
+                if fields['fechaEmision']:
+                    row.append(element.find('fechaEmision').text)
                 for x in element.findall('totalConImpuestos'):
                     for y in x.findall('totalImpuesto'):
-                        row.append(y.find('baseImponible').text)
-                        row.append(y.find('valor').text)
-                row.append(element.find('importeTotal').text)
-            print(row)
+                        if fields['baseImponible']:
+                            row.append(y.find('baseImponible').text)
+                        if fields['valor']:
+                            row.append(y.find('valor').text)
+                if fields['importeTotal']:
+                    row.append(element.find('importeTotal').text)
             detail_of_bills.append(row)
         return render(request,'results.html',context={'total_resume':detail_of_bills,'header':header})
     
