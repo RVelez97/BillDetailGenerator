@@ -2,15 +2,14 @@ import csv
 from django.http import HttpResponse
 from django.shortcuts import render
 import re
-
 import xml.etree.ElementTree as et
-header=[]
-detail_of_bills=[]
+
+
+output ={}
 
 def index(request):
-    global detail_of_bills,header
-    detail_of_bills=[]
-    header=[]
+    global output
+    output ={}
     return render(request,'index.html')
 
 def extract_data_from_line(line, pattern):
@@ -18,14 +17,14 @@ def extract_data_from_line(line, pattern):
 
 def results(request):
     if request.method == 'POST':
-        global header
+        global output
         files = request.FILES.getlist('myfiles')
         fields={
             'fechaEmision':True,
             'estab':False,
             'ptoEmi':False,
             'secuencial':False,
-            'razonSocial>':True,
+            'razonSocial':True,
             'ruc':False,
             'baseImponible':False,
             'valor':False,
@@ -48,23 +47,7 @@ def results(request):
         if('show-total-detailed-option' in request.POST):
             fields['baseImponible']=True
             fields['valor']=True
-        if fields['razonSocial>']:
-            header.append('Razon Social')
-        if fields['ruc']:
-            header.append('RUC')
-        if fields['estab']:
-            header.append('Numero de factura')
-        if fields['fechaEmision']:
-            header.append('Fecha de Emision')
-        if fields['baseImponible']:
-            header.append('Total Sin Impuestos')
-        if fields['valor']:
-            header.append('Impuestos')
-        if fields['importeTotal']:
-            header.append('Total')
         
-        
-        print(fields)
         global detail_of_bills
         for i in range(len(files)):
             information = str(files[i].read(),'ISO-8859-1')   
@@ -72,38 +55,49 @@ def results(request):
             ind2=information.index('</infoAdicional>')
             information="<?xml version='1.0' encoding='ISO-8859-1'?>\n"+'<data>\n'+information[ind1:ind2+len('</infoAdicional>')]+'\n</data>\n'
             root=et.fromstring(information)
-            row=[]
+            key=''
             for element in root.findall('infoTributaria'):
-                if fields['fechaEmision']:
-                    row.append(element.find('razonSocial').text)
                 if fields['ruc']:
-                    row.append(element.find('ruc').text)
+                    key=element.find('ruc').text
+                if fields['razonSocial']:
+                    key+='| '+element.find('razonSocial').text
+                    if key not in output:
+                        output[key]={}
                 if fields['estab']:
-                    row.append(element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text)
+                    bill_number=element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text
+                    output[key][bill_number]={}
+                
+
+                
             for element in root.findall('infoFactura'):
                 if fields['fechaEmision']:
-                    row.append(element.find('fechaEmision').text)
+                    output[key][bill_number]['Fecha de Emisión']=element.find('fechaEmision').text
                 for x in element.findall('totalConImpuestos'):
                     for y in x.findall('totalImpuesto'):
                         if fields['baseImponible']:
-                            row.append(y.find('baseImponible').text)
+                            output[key][bill_number]['Total sin Impuestos']=y.find('baseImponible').text
                         if fields['valor']:
-                            row.append(y.find('valor').text)
+                            output[key][bill_number]['Total en Impuestos']=y.find('valor').text
                 if fields['importeTotal']:
-                    row.append(element.find('importeTotal').text)
-            detail_of_bills.append(row)
-        return render(request,'results.html',context={'total_resume':detail_of_bills,'header':header})
+                    output[key][bill_number]['Total']=element.find('importeTotal').text
+        return render(request,'results.html',context={'output':output})
     
 def download_as_csv(request):
-    global header
-    global detail_of_bills
+    global output
+    bills_detail=[]
+    for company_info,content in output.items():
+        for bill_number,details in content.items():
+            r=[company_info,bill_number]
+            for detail in details.values():
+                r.append(detail)
+            bills_detail.append(r)
+                
     response = HttpResponse(
         content_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="report.csv"'},
     )
 
     writer = csv.writer(response)
-    writer.writerow(header)
-    writer.writerows([detail for detail in detail_of_bills])
+    writer.writerows([detail for detail in bills_detail])
 
     return response

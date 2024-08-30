@@ -3,20 +3,39 @@
 <div>
     Descargar como: <a href="{% url 'download_as_csv' %}"><button style='font-size:24px'>.csv</button></a>
 </div>
-<table class="table table-dark table-striped-columns">
-    <tr>
-        {% for title in header %}
-        <th>{{ title }}</th>
-        {% endfor %}
-    </tr>
-    <tbody class="table-group-divider">
-        {% for partial_resume in total_resume %}
-        <tr>
-            {% for element in partial_resume %}
-                <td>{{ element }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+
+<div class="accordion" id="accordionExample">
+    {% for stablishment_info,content in output.items %}
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+          {{ stablishment_info }} 
+        </button>
+      </h2>
+      <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          {% for bill_number,bill_content in content.items %}
+          <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  {{ bill_number }}
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    {% for key,value in bill_content.items %}
+                    <strong>{{ key }}: </strong>{{ value }} <br>
+                    {% endfor %}
+                 </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}
