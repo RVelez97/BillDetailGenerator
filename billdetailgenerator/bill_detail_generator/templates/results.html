@@ -5,25 +5,25 @@
 </div>
 
 
-<div class="accordion" id="accordionExample">
+<div class="accordion" id="accordion">
     {% for stablishment_info,content in output.items %}
     <div class="accordion-item">
       <h2 class="accordion-header">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#id-{{ loop.index }}" aria-expanded="false" aria-controls="id-{{ stablishment_info }}">
           {{ stablishment_info }} 
         </button>
       </h2>
-      <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+      <div id="id-{{ loop.index }}" class="accordion-collapse collapse show" data-bs-parent="#accordion">
         <div class="accordion-body">
           {% for bill_number,bill_content in content.items %}
-          <div class="accordion" id="accordionExample">
+          <div class="accordion" id="id-accordion-header-{{ bill_number }}">
             <div class="accordion-item">
               <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#id-{{ bill_number }}" aria-expanded="true" aria-controls="id-{{ bill_number }}">
                   {{ bill_number }}
                 </button>
               </h2>
-              <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+              <div id="id-{{ bill_number }}" class="accordion-collapse collapse show" data-bs-parent="#id-accordion-header-{{ bill_number }}">
                 <div class="accordion-body">
                     {% for key,value in bill_content.items %}
                     <strong>{{ key }}: </strong>{{ value }} <br>
