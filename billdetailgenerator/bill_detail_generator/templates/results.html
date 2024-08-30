@@ -6,11 +6,11 @@
 
 
 <div class="accordion" id="accordionExample">
-    {% for ruc,content in output.items %}
+    {% for stablishment_info,content in output.items %}
     <div class="accordion-item">
       <h2 class="accordion-header">
         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-            {{ ruc }}
+          {{ stablishment_info }} 
         </button>
       </h2>
       <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">

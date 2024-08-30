@@ -2,11 +2,14 @@ import csv
 from django.http import HttpResponse
 from django.shortcuts import render
 import re
-
 import xml.etree.ElementTree as et
 
+
+output ={}
+
 def index(request):
-    global detail_of_bills,header
+    global output
+    output ={}
     return render(request,'index.html')
 
 def extract_data_from_line(line, pattern):
@@ -14,14 +17,14 @@ def extract_data_from_line(line, pattern):
 
 def results(request):
     if request.method == 'POST':
-        output={}
+        global output
         files = request.FILES.getlist('myfiles')
         fields={
             'fechaEmision':True,
             'estab':False,
             'ptoEmi':False,
             'secuencial':False,
-            'razonSocial>':True,
+            'razonSocial':True,
             'ruc':False,
             'baseImponible':False,
             'valor':False,
@@ -52,42 +55,49 @@ def results(request):
             ind2=information.index('</infoAdicional>')
             information="<?xml version='1.0' encoding='ISO-8859-1'?>\n"+'<data>\n'+information[ind1:ind2+len('</infoAdicional>')]+'\n</data>\n'
             root=et.fromstring(information)
-            ruc=''
-            bill_number=''
+            key=''
             for element in root.findall('infoTributaria'):
                 if fields['ruc']:
-                    ruc=element.find('ruc').text
-                    if ruc not in output:
-                        output[ruc]={}
+                    key=element.find('ruc').text
+                if fields['razonSocial']:
+                    key+='| '+element.find('razonSocial').text
+                    if key not in output:
+                        output[key]={}
                 if fields['estab']:
                     bill_number=element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text
-                    output[ruc][bill_number]={}
-                if fields['fechaEmision']:
-                    output[ruc][bill_number]['Razón Social']=element.find('razonSocial').text
+                    output[key][bill_number]={}
+                
+
                 
             for element in root.findall('infoFactura'):
                 if fields['fechaEmision']:
-                    output[ruc][bill_number]['Fecha de Emisión']=element.find('fechaEmision').text
+                    output[key][bill_number]['Fecha de Emisión']=element.find('fechaEmision').text
                 for x in element.findall('totalConImpuestos'):
                     for y in x.findall('totalImpuesto'):
                         if fields['baseImponible']:
-                            output[ruc][bill_number]['Total sin Impuestos']=y.find('baseImponible').text
+                            output[key][bill_number]['Total sin Impuestos']=y.find('baseImponible').text
                         if fields['valor']:
-                            output[ruc][bill_number]['Total en Impuestos']=y.find('valor').text
+                            output[key][bill_number]['Total en Impuestos']=y.find('valor').text
                 if fields['importeTotal']:
-                    output[ruc][bill_number]['Total']=element.find('importeTotal').text
+                    output[key][bill_number]['Total']=element.find('importeTotal').text
         return render(request,'results.html',context={'output':output})
     
 def download_as_csv(request):
-    global header
-    global detail_of_bills
+    global output
+    bills_detail=[]
+    for company_info,content in output.items():
+        for bill_number,details in content.items():
+            r=[company_info,bill_number]
+            for detail in details.values():
+                r.append(detail)
+            bills_detail.append(r)
+                
     response = HttpResponse(
         content_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="report.csv"'},
     )
 
     writer = csv.writer(response)
-    writer.writerow(header)
-    writer.writerows([detail for detail in detail_of_bills])
+    writer.writerows([detail for detail in bills_detail])
 
     return response
