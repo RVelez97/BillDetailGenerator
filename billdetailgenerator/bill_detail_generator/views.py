@@ -18,6 +18,7 @@ def extract_data_from_line(line, pattern):
 def results(request):
     if request.method == 'POST':
         global output
+        ids={}
         files = request.FILES.getlist('myfiles')
         fields={
             'fechaEmision':True,
@@ -55,16 +56,21 @@ def results(request):
             ind2=information.index('</infoAdicional>')
             information="<?xml version='1.0' encoding='ISO-8859-1'?>\n"+'<data>\n'+information[ind1:ind2+len('</infoAdicional>')]+'\n</data>\n'
             root=et.fromstring(information)
+            ruc=''
             key=''
             for element in root.findall('infoTributaria'):
                 if fields['ruc']:
                     key=element.find('ruc').text
+                    ruc=key
+                    if ruc not in ids:
+                        ids[ruc]=[]
                 if fields['razonSocial']:
                     key+='| '+element.find('razonSocial').text
                     if key not in output:
                         output[key]={}
                 if fields['estab']:
                     bill_number=element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text
+                    ids[ruc].append(ruc+'-'+bill_number)
                     output[key][bill_number]={}
                 
 
@@ -80,7 +86,11 @@ def results(request):
                             output[key][bill_number]['Total en Impuestos']=y.find('valor').text
                 if fields['importeTotal']:
                     output[key][bill_number]['Total']=element.find('importeTotal').text
-        return render(request,'results.html',context={'output':output})
+        return render(request,'results.html',
+                      context={
+                          'output':output,
+                          'ids':ids,
+                          })
     
 def download_as_csv(request):
     global output
