@@ -3,30 +3,10 @@
 <div class="container text-center col-8">
     <form method="post" action="{% url 'results' %}" enctype="multipart/form-data">
         {% csrf_token %}
+        
         <div class="card">
             <div class="card-header">
-                Selecciona los campos que deseas mostrar en el reporte
-            </div>
-            <div class="form-check form-switch">
-                <input name='show-all-fields-option' class="form-check-input" type="checkbox" role="switch" id="id-show-all-fields-option" checked>
-                <label class="form-check-label" for="id-show-all-fields-option">Mostrar todos los campos</label>
-            </div>
-            <div class="form-check form-switch">
-                <input name='show-bill-number-option' class="form-check-input" type="checkbox" role="switch" id="id-show-bill-number-option">
-                <label class="form-check-label" for="id-show-bill-number-option">Numero de Factura</label>
-            </div>
-            <div class="form-check form-switch">
-                <input name ='show-ruc-option' class="form-check-input" type="checkbox" role="switch" id="id-show-ruc-option">
-                <label class="form-check-label" for="id-show-ruc-option">RUC</label>
-            </div>
-            <div class="form-check form-switch">
-                <input name='show-total-detailed-option' class="form-check-input" type="checkbox" role="switch" id="id-show-total-detailed-option">
-                <label class="form-check-label" for="id-show-total-detailed-option">Total Detallado</label>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                Carga tus archivos en formato '.xml'
+                <h1><Strong>Carga tus archivos en formato '.xml'</Strong></h1>
             </div>
             <div>
                 <input name="myfiles" type="file" id="files" multiple accept=".xml" required="true">
@@ -36,46 +16,4 @@
 
     </form>
 </div>
-<script>
-    const showAllOptionsCheck = document.querySelector("input[id='id-show-all-fields-option']")
-    const showBillNumberCheck = document.querySelector("input[id='id-show-bill-number-option']")
-    const showRucCheck = document.querySelector("input[id='id-show-ruc-option']")
-    const showTotalDetailedCheck = document.querySelector("input[id='id-show-total-detailed-option']")
-    showAllOptionsCheck.addEventListener('change', function (e) {
-        if (showAllOptionsCheck.checked) {
-            showBillNumberCheck.checked = false;
-            showRucCheck.checked = false;
-            showTotalDetailedCheck.checked = false;
-        }
-        checkAllUnselected();
-    })
-
-    showBillNumberCheck.addEventListener('change',function(e){
-        if(showBillNumberCheck.checked){
-            showAllOptionsCheck.checked=false;
-        }
-        checkAllUnselected()
-    })
-
-    showRucCheck.addEventListener('change',function(e){
-        if(showRucCheck.checked){
-            showAllOptionsCheck.checked=false;
-        }
-        checkAllUnselected()
-    })
-
-    showTotalDetailedCheck.addEventListener('change',function(e){
-        if(showTotalDetailedCheck.checked){
-            showAllOptionsCheck.checked=false;
-        }
-        checkAllUnselected()
-    })
-
-    function checkAllUnselected(){
-        if(showBillNumberCheck.checked == false && showRucCheck.checked == false &&  showTotalDetailedCheck == false){
-            showAllOptionsCheck.checked=true;
-        }
-    }
-
-</script>
 {% endblock %}
