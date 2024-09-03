@@ -1,43 +1,69 @@
 {% extends 'base.html' %}
 {% block content %}
 <div>
-    Descargar como: <a href="{% url 'download_as_csv' %}"><button style='font-size:24px'>.csv</button></a>
+  Descargar como: <a href="{% url 'download_as_csv' %}"><button style='font-size:24px'>.csv</button></a>
 </div>
 
 
 <div class="accordion accordion-flush" id="accordion">
-    {% for stablishment_info,content in output.items %}
-    <div class="accordion-item">
-      {% with ind=forloop.counter0 %}
-      <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#id-{{ ind }}" aria-expanded="false" aria-controls="id-{{ ind }}">
-          {{ stablishment_info }} 
-        </button>
-      </h2>
-      <div id="id-{{ ind }}" class="accordion-collapse collapse " data-bs-parent="#accordion">
-        <div class="accordion-body">
-          {% for bill_number,bill_content in content.items %}
-            <div class="accordion-item accordion-flush">
-              {% with innerInd=forloop.counter0 %}
-              <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#id-item-{{ innerInd }}" aria-expanded="false" aria-controls="id-item-{{ innerInd }}">
-                  <strong>{{ bill_number }}</strong>
-                </button>
-              </h2>
-              <div id="id-item-{{ innerInd }}" class="accordion-collapse collapse " data-bs-parent="#accordion-item">
-                <div class="accordion-body">
-                    {% for key,value in bill_content.items %}
-                    <strong>{{ key }}: </strong>{{ value }} <br>
+  {% for stablishment_info,content in output.items %}
+  <div class="accordion-item">
+    {% with ind=forloop.counter0 %}
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#id-{{ ind }}"
+        aria-expanded="false" aria-controls="id-{{ ind }}">
+        {{ stablishment_info }}
+      </button>
+    </h2>
+    <div id="id-{{ ind }}" class="accordion-collapse collapse " data-bs-parent="#accordion">
+      <div class="accordion-body">
+        {% for bill_number,bill_content in content.items %}
+        <div class="accordion-item accordion-flush">
+          {% with innerInd=forloop.counter0 %}
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+              data-bs-target="#id-item-{{ innerInd }}" aria-expanded="false" aria-controls="id-item-{{ innerInd }}">
+              <strong>{{ bill_number }}</strong>
+            </button>
+          </h2>
+          <div id="id-item-{{ innerInd }}" class="accordion-collapse collapse " data-bs-parent="#accordion-item">
+            <div class="accordion-body">
+              {% for key,value in bill_content.items %}
+              {% if key != 'Detalles' %}
+              <strong>{{ key }}: </strong>{{ value }} <br>
+              {% else %}
+              <div class="accordion-item accordion-flush">
+                <h2 class="accordion-header">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#id-item1-{{ innerInd }}" aria-expanded="false"
+                    aria-controls="id-item1-{{ innerInd }}">
+                    <strong>Detail of Bill</strong>
+                  </button>
+                </h2>
+                <div id="id-item1-{{ innerInd }}" class="accordion-collapse collapse " data-bs-parent="#accordion-item">
+                  <div class="accordion-body">
+                    {% for number,item in value.items %}
+                    <div>
+                      {% for name,val in item.items %}
+                      <strong>{{ name }}: </strong> {{ val }}
+                      {% endfor %}
+                    </div>
                     {% endfor %}
-                 </div>
+                  </div>
+                </div>
               </div>
+              {% endif %}
+              {% endfor %}
+
             </div>
-            {% endwith %}
-          {% endfor %}
+          </div>
         </div>
+        {% endwith %}
+        {% endfor %}
       </div>
-      {% endwith %}
     </div>
-    {% endfor %}
+    {% endwith %}
+  </div>
+  {% endfor %}
 </div>
 {% endblock %}
