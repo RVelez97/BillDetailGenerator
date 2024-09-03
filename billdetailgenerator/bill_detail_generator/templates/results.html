@@ -42,7 +42,13 @@
                 </h2>
                 <div id="id-item1-{{ innerInd }}" class="accordion-collapse collapse " data-bs-parent="#accordion-item">
                   <div class="accordion-body">
-
+                    {% for number,item in value.items %}
+                    <div>
+                      {% for name,val in item.items %}
+                      <strong>{{ name }}: </strong> {{ val }}
+                      {% endfor %}
+                    </div>
+                    {% endfor %}
                   </div>
                 </div>
               </div>
