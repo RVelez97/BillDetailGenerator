@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import re
 import xml.etree.ElementTree as et
+import datetime
 
 
 output ={}
@@ -30,6 +31,7 @@ def results(request):
             root=et.fromstring(information)
             key=''
             bill_number=''
+            tax_percentaje=0
 
             for element in root.findall('infoTributaria'):
                 key=element.find('ruc').text
@@ -37,16 +39,22 @@ def results(request):
                 if key not in output:
                     output[key]={}
                 bill_number=element.find('estab').text+'-'+element.find('ptoEmi').text+'-'+element.find('secuencial').text
-                output[key][bill_number]={}
+                output[key][bill_number] = {}
                 
             for element in root.findall('infoFactura'):
+                date=element.find('fechaEmision').text
+                date_splitted= date.split('/')
+                if(datetime.datetime(year=int(date_splitted[2]),month=int(date_splitted[1]),day=int(date_splitted[0]))>= datetime.datetime(year=2024,month=4,day=1)):
+                    tax_percentaje = 0.15
+                else:
+                    tax_percentaje =0.12
+                output[key][bill_number]['Fecha de Emisión']=date
                 output[key][bill_number]['Dirección del Establecimiento']=element.find('dirEstablecimiento').text
-                output[key][bill_number]['Fecha de Emisión']=element.find('fechaEmision').text
-                for x in element.findall('totalConImpuestos'):
-                    for y in x.findall('totalImpuesto'):
-                        output[key][bill_number]['Total sin Impuestos']=y.find('baseImponible').text
-                        output[key][bill_number]['Total en Impuestos']=y.find('valor').text
-                output[key][bill_number]['Total']=element.find('importeTotal').text
+                total_out_of_taxes=float(element.find('totalSinImpuestos').text)
+                total_of_taxes=round(total_out_of_taxes*tax_percentaje,2)
+                output[key][bill_number]['Total sin Impuestos']=total_out_of_taxes
+                output[key][bill_number]['Total en Impuestos']=total_of_taxes
+                output[key][bill_number]['Total']=total_of_taxes+total_out_of_taxes
             index=0    
             output[key][bill_number]['Detalles']={}
             for detalle in root.findall('detalles'):
@@ -56,18 +64,20 @@ def results(request):
                     output[key][bill_number]['Detalles'][index]['Cantidad']=element.find('cantidad').text
                     for impuesto in element.findall('impuestos'):
                         for detalle_impuesto in impuesto.findall('impuesto'):
-                            output[key][bill_number]['Detalles'][index]['Total sin Impuestos']=detalle_impuesto.find('baseImponible').text
-                            output[key][bill_number]['Detalles'][index]['Total en Impuestos']=detalle_impuesto.find('valor').text
-                    index+=1
-        print(output)
+                            total_out_of_taxes=float(detalle_impuesto.find('baseImponible').text)
+                            total_of_taxes=float(detalle_impuesto.find('valor').text)
+                            output[key][bill_number]['Detalles'][index]['Total sin Impuestos'] = round(total_out_of_taxes,2)
+                            output[key][bill_number]['Detalles'][index]['Total en Impuestos'] = round(total_of_taxes,2)
+                            output[key][bill_number]['Detalles'][index]['Valor final'] = round(total_of_taxes+total_out_of_taxes,2)
+                    index += 1
         return render(request,'results.html',
-                      context={
+                      context = {
                           'output':output,
                           })
     
 def download_as_csv(request):
     global output
-    bills_detail=[]
+    bills_detail = []
     for company_info,content in output.items():
         for bill_number,details in content.items():
             r=[company_info,bill_number]
