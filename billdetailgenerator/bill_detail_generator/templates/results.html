@@ -37,18 +37,29 @@
                   <button class="accordion-button" type="button" data-bs-toggle="collapse"
                     data-bs-target="#id-item1-{{ innerInd }}" aria-expanded="false"
                     aria-controls="id-item1-{{ innerInd }}">
-                    <strong>Detail of Bill</strong>
+                    <strong>Detalle de la factura</strong>
                   </button>
                 </h2>
                 <div id="id-item1-{{ innerInd }}" class="accordion-collapse collapse " data-bs-parent="#accordion-item">
                   <div class="accordion-body">
-                    {% for number,item in value.items %}
-                    <div>
-                      {% for name,val in item.items %}
-                      <strong>{{ name }}: </strong> {{ val }}
-                      {% endfor %}
-                    </div>
-                    {% endfor %}
+                    <table class="table table-striped-columns table-hover">
+                      <thead>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Total sin Impuestos</th>
+                        <th>Total en Impuestos</th>
+                        <th>Valor Final</th>
+                      </thead>
+                      <tbody>
+                        {% for number,item in value.items %}
+                        <tr>
+                          {% for name,val in item.items %}
+                          <td> {{ val }} </td>
+                          {% endfor %}
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
